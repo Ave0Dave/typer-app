@@ -36,7 +36,7 @@ restartButtonElement.addEventListener("click", reset);
 timeRemaining < 60 ? currentTimeElement.innerText = `00 : ${timeRemaining}` : currentTimeElement.innerText = `0${timeRemaining / 60} : 00`;
 
 function getRandomQuote() {
-    return fetch("http://api.quotable.io/random?minLength=100&&maxLength=175")
+    return fetch("https://api.quotable.io/random?minLength=100&&maxLength=175")
         .then(response => response.json())
         .then(data => data.content);
 }
