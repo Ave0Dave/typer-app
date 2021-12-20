@@ -1,0 +1,148 @@
+
+:root {
+    --color-black: #121212;
+    --color-white: #f7f7f7;
+    --color-grey: #222222;
+    --color-grey-light: #515151;
+    --color-green: #A3BE8C;
+    --color-red: #BF616A;
+    --color-violet: #d6a9d5;
+    --color-violet-light: #c054be;
+  }
+  
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  
+  * { 
+    margin: 0;
+    padding: 0;
+  }
+  
+  html, body {
+    height: 100%;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    display: flex;
+    justify-content: center; 
+
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.5rem;
+    line-height: 1.6em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    
+    color: var(--color-white);
+    background: var(--color-black);
+  }
+
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input, button, textarea, select {
+    font: inherit;
+  }
+
+  p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+  }
+
+  #root, #__next {
+    isolation: isolate;
+  }
+
+  .app-container {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+
+    max-width: 70ch;
+  }
+
+  .statistics-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .quote {
+    width: 68ch;
+    cursor: default;
+    user-select: none;
+  }
+
+  .box {
+    padding: 0.7rem;
+    margin: 0.3rem;
+    
+    color: var(--color-white);
+    background-color: var(--color-grey);
+    
+    border: none;
+    border-radius: 0.4rem;
+  }
+
+  img {
+    height: 2rem;
+    fill: var(--color-white);
+  }
+
+  .restart {
+    cursor: pointer;
+  }
+
+  .input, .restart {
+    transition: 150ms ease-in-out;
+  }
+
+  .restart:hover, .restart:focus {
+    outline: none;
+    background: var(--color-grey-light); 
+  }
+
+  .input {
+    width: 99%;
+    height: 3.6rem;
+    padding-top: 0.4rem;
+
+    caret-color: var(--color-violet);
+    color: var(--color-white);
+    border: 2px solid var(--color-grey-light);
+
+    resize: none;
+    overflow: hidden;
+  }
+
+  .input:hover, .input:focus {
+    outline: none;
+    border: 2px solid var(--color-violet-light);
+  }
+
+  .correct {
+    color: var(--color-green);
+  }
+  
+  span {
+    transition: 150ms ease;
+  }
+
+  .incorrect {
+    color: var(--color-red);
+  }
+
+  .neutral {
+    background: var(--color-grey-light);
+    border-radius: 0.1rem;
+  }
+
+  .disabled {
+    pointer-events: none; 
+  }

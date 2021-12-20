@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="author" content="David Červenec">
+    <meta name="description" content="Školní projekt - JS App | Type test">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" href="typer-icon.png" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="script.js" async></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+    <title>TYPER</title>
+  </head>
+  <body>
+    <main class="app-container">
+      <div class="statistics-wrapper">
+        <div id="current-wpm" class="wpm box">0 WPM</div>
+
+          <div id="current-time" class="timer box">00 : 00</div>
+   
+          <div id="current-errors" class="errors box">0 Errors</div>
+
+          <div id="current-accuracy" class="accuracy box">0 %</div>
+
+          <button id="restart-button" class="restart box">
+            <img src="restart-icon.svg">
+          </button>
+      </div>
+
+      <p id="qoute-text" class="quote box">⌛ Loading text.</p>
+        
+      <textarea id="input-box" class="input box" placeholder="Start typing here."></textarea>
+
+    </main>  
+  </body>
+</html>
