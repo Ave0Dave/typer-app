@@ -1,15 +1,17 @@
 const TimeLimit = {
-    test : 60,
-    short : 60,
-    medium: 120,
-    long: 180,
-    default: 60
+    time10 : 10,
+    time30: 30,
+    time100: 60,
+    time200: 180,
+    time500: 300
 }
 
-const Score = function(wpm, errors) {
+const Result = function(wpm, errors, accuracy, time) {
     return {
         wpm,
-        errors
+        errors,
+        accuracy,
+        time
     };
 }
 
@@ -20,8 +22,15 @@ const currentErrorsElement = document.getElementById("current-errors");
 const currentAccuracyElement = document.getElementById("current-accuracy");
 const inputBoxElement = document.getElementById("input-box");
 const restartButtonElement = document.getElementById("restart-button");
+const resultsTabelElement = document.getElementById("results-table");
+const focusModeElement = document.getElementById("focus-mode");
 
-let timeRemaining = TimeLimit.test;
+const resultsData = JSON.parse(localStorage.getItem("Results"));
+
+const timerArray = document.querySelectorAll(".timer");
+
+let selectedTimer = TimeLimit.time30;
+let timeRemaining = selectedTimer;
 let timeElapsed = 0;
 let errorsTotal = 0;
 let currentAccuracy;
@@ -30,10 +39,8 @@ let charactersTyped = 0;
 let charactersCorrect = 0;
 let wordsPerMinute = 0;
 let timer;
-let scoresArray = [];
-
-restartButtonElement.addEventListener("click", reset);
-timeRemaining < 60 ? currentTimeElement.innerText = `00 : ${timeRemaining}` : currentTimeElement.innerText = `0${timeRemaining / 60} : 00`;
+let degrees = 0;
+let resultsArray = [];
 
 function getRandomQuote() {
     return fetch("https://api.quotable.io/random?minLength=100&&maxLength=175")
@@ -41,12 +48,14 @@ function getRandomQuote() {
         .then(data => data.content);
 }
 
+//TODO: Remove forEach
 async function renderNewQuote() {
     const quote = await getRandomQuote();
     quoteTextElement.innerHTML = "";
 
     quote.split("").forEach((character) => {
-        const quoteCharacter = document.createElement('span')
+        const quoteCharacter = document.createElement("span");
+        quoteCharacter.className = "char";
         quoteCharacter.innerText = character;
         quoteTextElement.appendChild(quoteCharacter);
     })
@@ -55,26 +64,25 @@ async function renderNewQuote() {
 
 inputBoxElement.addEventListener("input", handleText);
 inputBoxElement.addEventListener("keydown", addTimer, {once : true});
-inputBoxElement.addEventListener("keydown", ({key}) => {
-    const quoteArray = quoteTextElement.querySelectorAll('span')
-    const inputArray = inputBoxElement.value.split("");
 
+inputBoxElement.addEventListener("keydown", ({key}) => {
+    const quoteArray = quoteTextElement.querySelectorAll("span")
+    const inputArray = inputBoxElement.value.split("");
+    
     for (let [index, quoteCharacterElement] of quoteArray.entries()) {
-        if ((inputArray[index]!= null) && ["Backspace", "Delete"].includes(key)) {
-            quoteArray[index + 1].classList.remove("neutral");
-            quoteCharacterElement.classList.add("neutral");
+        const inputCharacter = inputArray[index];
+        if ((inputCharacter!= null) && ["Backspace", "Delete"].includes(key)) {
+            quoteArray[index + 1].classList.remove("highlight");
+            quoteCharacterElement.classList.add("highlight");
         }
-        
     }
 });
 
-//TODO: Make next character highlight working with deletation
-//TODO: Fix weird delay on input
 //TODO: Clear word after whitespace
-function handleText() {
-
-    const quoteArray = quoteTextElement.querySelectorAll('span')
+function handleText() { 
+    const quoteArray = quoteTextElement.querySelectorAll("span")
     const inputArray = inputBoxElement.value.split("");
+    
     currentErrors = 0;
     charactersTyped++;
 
@@ -82,32 +90,31 @@ function handleText() {
         const inputCharacter = inputArray[index];
 
         if ((inputCharacter != null) && ((index + 1) < quoteArray.length)) {
-            quoteArray[index + 1].classList.add("neutral");
-            quoteCharacterElement.classList.remove("neutral");
-        }
-
-        if (inputCharacter == null) {
-            quoteCharacterElement.classList.remove('correct')
-            quoteCharacterElement.classList.remove('incorrect')
-
-        } else if (inputCharacter === quoteCharacterElement.innerText) {
-            quoteCharacterElement.classList.add('correct')
-            quoteCharacterElement.classList.remove('incorrect')
-
-        } else {
-            quoteCharacterElement.classList.remove('correct')
-            quoteCharacterElement.classList.add('incorrect')
-
-            currentErrors++;
+            quoteArray[index + 1].classList.add("highlight");
+            quoteCharacterElement.classList.remove("highlight");
         }
         
+        if (inputCharacter == null) {
+            quoteCharacterElement.classList.remove("correct");
+            quoteCharacterElement.classList.remove("incorrect");
+
+        } else if (inputCharacter === quoteCharacterElement.innerText) {
+            quoteCharacterElement.classList.add("correct");
+            quoteCharacterElement.classList.remove("incorrect");
+
+        } else {
+            quoteCharacterElement.classList.remove("correct");
+            quoteCharacterElement.classList.add("incorrect");
+
+            currentErrors++;
+        } 
     }
 
     charactersCorrect = (charactersTyped - (errorsTotal + currentErrors));
-    currentErrorsElement.innerText = `${currentErrors} Errors`;
+    currentErrorsElement.innerHTML = `${currentErrors + errorsTotal} <span class="small">Errors</span>`;
 
     currentAccuracy = ((charactersCorrect / charactersTyped ) * 100);
-    currentAccuracyElement.innerText = `${Math.round(currentAccuracy)} %`;
+    currentAccuracyElement.innerHTML = `${Math.round(currentAccuracy)} <span class="small">%</span>`;
 
     if (inputArray.length === quoteArray.length) {
         renderNewQuote();
@@ -120,23 +127,23 @@ function updateTimer() {
     if (timeRemaining >= 0) {
         let minutes = parseInt(timeRemaining / 60);
         let seconds = parseInt(timeRemaining % 60);
-  
+        
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        
+        currentTimeElement.innerText = `${minutes} : ${seconds}`;
+        
         timeRemaining--;
         timeElapsed++;
 
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-
         wordsPerMinute = Math.round((((charactersTyped / 5) / timeElapsed) * 60));
         
-        currentWPMElement.innerText = `${wordsPerMinute} WPM`;
+        currentWPMElement.innerHTML = `${wordsPerMinute} <span class="small">WPM</span>`;
         
-        currentTimeElement.innerText = `${minutes} : ${seconds}`;
-    } 
-    else {
-        let score = new Score(wordsPerMinute, currentAccuracy);
-        saveDataToLocalStorage(score);
-        resetValues();
+    } else {
+        let result = new Result(wordsPerMinute, errorsTotal + currentErrors, currentAccuracy, TimeLimit.default);
+        saveDataToLocalStorage(result);
+        resetInstance();
     }
 }
 
@@ -144,44 +151,111 @@ function addTimer() {
     timer = setInterval(updateTimer, 1000);
 }
 
+function attachListenerToTimers() {
+    for (timer of timerArray) {
+        timer.addEventListener("click", (e) => {
+            const selectedTimersArray = document.querySelectorAll(".timer");
+            
+            switch (e.target.id) {
+                case "timer-10": timeRemaining = TimeLimit.time10;
+                break;
+                case "timer-30": timeRemaining = TimeLimit.time30;
+                break;
+                case "timer-100": timeRemaining = TimeLimit.time100;
+                break;
+                case "timer-200": timeRemaining = TimeLimit.time200;
+                break;
+                case "timer-500": timeRemaining = TimeLimit.time500;
+                break;
+            }
+            
+            for (timer of selectedTimersArray) {
+                timer.classList.remove("selected");
+            }
+            e.target.classList.add("selected");
+            
+            currentTimeElement.classList.add("blink");
+            const blink = document.querySelector(".blink");
+            blink.addEventListener('animationend', () => {
+                currentTimeElement.classList.remove("blink");
+            });
 
-function resetValues() {  
-    inputBoxElement.disabled = true;
+            selectedTimer = timeRemaining; 
+            timeRemaining < 60 ? currentTimeElement.innerText = `00 : ${timeRemaining}` : currentTimeElement.innerText = `0${timeRemaining / 60} : 00`;
+        });
+    }
+}
+
+function resetInstance() {  
     renderNewQuote();
     clearInterval(timer);
     inputBoxElement.addEventListener("keydown", addTimer, {once : true});
+    inputBoxElement.disabled = true;
 
-    timeRemaining = TimeLimit.test;
-    wordsPerMinute = 0;
+    timeRemaining = selectedTimer;
     timeElapsed = 0;
-    currentErrors = 0;
+    wordsPerMinute = 0;
     errorsTotal = 0;
+    currentErrors = 0;
     charactersTyped = 0;
     currentAccuracy = 0;
 
-    currentWPMElement.innerText = "0 WPM";
     timeRemaining < 60 ? currentTimeElement.innerText = `00 : ${timeRemaining}` : currentTimeElement.innerText = `0${timeRemaining / 60} : 00`;
+    currentWPMElement.innerText = "0 WPM";
     currentErrorsElement.innerText = "0 Errors";
     currentAccuracyElement.innerText = "0 %";
+
+    degrees += 360;
+    const restartIconElement = document.getElementById("restart-icon");
+    restartIconElement.style.transform = `rotate(${degrees}deg)`;
 }
 
-function reset() {
-    resetValues();
+function resetManual() {
+    resetInstance();
     inputBoxElement.disabled = false;
 }
 
-renderNewQuote();
-
 function saveDataToLocalStorage(data)
 {
-    scoresArray = JSON.parse(localStorage.getItem('Scores')) || [];
-    scoresArray.push(data);
+    resultsArray = JSON.parse(localStorage.getItem("Results")) || [];
+    resultsArray.push(data);
 
-    localStorage.setItem('Scores', JSON.stringify(scoresArray));
+    localStorage.setItem("Results", JSON.stringify(resultsArray));
 }
 
-const scores = JSON.parse(localStorage.getItem('Scores'));
+function renderResults() {
+    if (resultsData != null) {
+        for (result of resultsData) {
+            const resultsRow = document.createElement("tr");
+            resultsRow.innerHTML = `<td>${result.wpm}</td>
+                                    <td>${result.errors}</td>
+                                    <td>${result.accuracy.toFixed(2)} %</td>
+                                    <td>${resultsData.at(-1).errors}</td>`;
+            resultsTabelElement.appendChild(resultsRow);
+        }
+    }
+}
 
-// for (const element of scores) {
-//     console.log(element);
+// function renderNewResult() {
+//     if (resultsData != null) {
+//         console.log(resultsData.at(-1));
+//             const resultsRow = document.createElement("tr");
+//             resultsRow.innerHTML = `<td>${resultsData.at(-1).wpm}</td>
+//                                     <td>${resultsData.at(-1).errors}</td>
+//                                     <td>${resultsData.at(-1).accuracy.toFixed(2)} %</td>
+//                                     <td>${resultsData.at(-1).time}</td>`;
+//             scoresTableElement.appendChild(resultsRow);
+//     }
 // }
+
+attachListenerToTimers();
+renderNewQuote();
+renderResults() 
+
+restartButtonElement.addEventListener("click", resetManual);
+focusModeElement.addEventListener("click", () => {
+    focusModeElement.classList.toggle("selected");
+    const overlayElement = document.getElementById("overlay");
+    overlayElement.classList.toggle("overlay-visible");
+});
+timeRemaining < 60 ? currentTimeElement.innerText = `00 : ${timeRemaining}` : currentTimeElement.innerText = `0${timeRemaining / 60} : 00`;
