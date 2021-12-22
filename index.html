@@ -54,31 +54,31 @@
       </div>
 
       <div class="results-container">
-        <div>
+        <div class="last-result-wrapper">
           <div>
             <canvas id="myChart"></canvas>
           </div>
           
           <table class="table last-result">
-            <tr id="table-wpm">
+            <tr>
               <th>WPM</th>
-              <td>00</td>
+              <td id="table-wpm">00</td>
             </tr>
-            <tr id="table-errors">
+            <tr>
               <th>Errors</th>
-              <td>00</td>
+              <td id="table-errors">00</td>
             </tr>
-            <tr id="table-accuracy">
+            <tr>
               <th>Accuracy</th>
-              <td>00</td>
+              <td id="table-accuracy">00</td>
             </tr>
-            <tr id="table-time">
+            <tr>
               <th>Time</th>
-              <td>00</td>
+              <td id="table-time">00</td>
             </tr>
           </table>
         </div>
-        
+          
         <table class="table complete-result">
           <thead>
             <tr>
@@ -86,11 +86,13 @@
               <th>Errors</th>
               <th>Accuracy</th>
               <th>Time</th>
+              <th class="delete-button"><button id="delete-results">❌</button></th>
             </tr>
           </thead>
           <tbody id="results-table">
           </tbody>
         </table>
+
       </div>
     </main> 
   </body>

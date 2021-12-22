@@ -22,9 +22,10 @@ const currentErrorsElement = document.getElementById("current-errors");
 const currentAccuracyElement = document.getElementById("current-accuracy");
 const inputBoxElement = document.getElementById("input-box");
 const restartButtonElement = document.getElementById("restart-button");
-const resultsTabelElement = document.getElementById("results-table");
+const resultsTableElement = document.getElementById("results-table");
 const focusModeElement = document.getElementById("focus-mode");
 const inputModeElement = document.getElementById("input-mode");
+const deleteResultsElement = document.getElementById("delete-results");
 
 const timerArray = document.querySelectorAll(".timer");
 
@@ -44,21 +45,54 @@ let running = false;
 
 const data = {
     labels: [],
-    datasets: [{
-        label: 'My First dataset',
-        backgroundColor: 'rgb(255, 99, 132)',
-        borderColor: 'rgb(255, 99, 132)',
+    datasets: [
+        {
+        label: 'WPM',
+        backgroundColor: "#7e6db3",
+        borderColor: '#7e6db3',
+        cubicInterpolationMode: 'monotone',
         data: [],
-    }]
+    },
+    {
+        label: 'Accuracy',
+        backgroundColor: "#5f43b2",
+        borderColor: '#5f43b2',
+        cubicInterpolationMode: 'monotone',
+        data: [],
+    }
+    ]
 };
 
 const config = {
     type: 'line',
     data: data,
-    options: {}
+    options: {
+        plugins: {
+            legend: {
+                labels: {
+                    usePointStyle: true,
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                
+                        grid: {
+                        drawOnChartArea: false,
+                        },
+                    },
+                }
+            }
+        }
+    }
 };
 
-//MAKE THE FAKING CHART INTO LOCAL STORAGE
 let myChart = new Chart(document.getElementById("myChart"), config);
 
 function getRandomQuote() {
@@ -81,28 +115,12 @@ async function renderNewQuote() {
     inputBoxElement.value = "";
 }
 
-inputBoxElement.addEventListener("input", handleText);
-inputBoxElement.addEventListener("keydown", addTimer, {once : true});
-
-inputBoxElement.addEventListener("keydown", ({key}) => {
-    const quoteArray = quoteTextElement.querySelectorAll("span")
-    const inputArray = inputBoxElement.value.split("");
-    
-    for (let [index, quoteCharacterElement] of quoteArray.entries()) {
-        const inputCharacter = inputArray[index];
-        if ((inputCharacter!= null) && ["Backspace", "Delete"].includes(key)) {
-            quoteArray[index + 1].classList.remove("highlight");
-            quoteCharacterElement.classList.add("highlight");
-        }
-    }
-});
-
 //TODO: Clear word after whitespace
 //TODO: Stop inputText from moving
 //TODO: If errors before space dont proceed to another word
 function handleText() { 
     running = true;
-    const quoteArray = quoteTextElement.querySelectorAll("span")
+    const quoteArray = quoteTextElement.querySelectorAll(".char")
     const inputArray = inputBoxElement.value.split("");
     
     currentErrors = 0;
@@ -144,7 +162,6 @@ function handleText() {
     }
 }
 
-//TODO: Make WPM color coded
 function updateTimer() {
     if (timeRemaining > 0) {
         timeRemaining--;
@@ -157,7 +174,7 @@ function updateTimer() {
         seconds = seconds < 10 ? "0" + seconds : seconds;
                 
         wordsPerMinute = Math.round((((charactersTyped / 5) / timeElapsed) * 60));
-        addDataToChart(myChart, timeElapsed, wordsPerMinute);
+        addDataToChart(myChart, timeElapsed, wordsPerMinute, currentAccuracy);
 
         currentTimeElement.innerText = `${minutes} : ${seconds}`;
         currentWPMElement.innerHTML = `${wordsPerMinute} <span class="small">WPM</span>`;
@@ -165,7 +182,7 @@ function updateTimer() {
     } else {
         let result = new Result(wordsPerMinute, errorsTotal + currentErrors, currentAccuracy, selectedTimer);
         saveDataToLocalStorage(result);
-        renderNewResult(resultsTabelElement);
+        renderNewResult(resultsTableElement);
         resetInstance();
         running = false;
     }
@@ -260,21 +277,16 @@ function resetManual() {
     myChart = new Chart(document.getElementById('myChart'), config);
 }
 
-function removeData(chart) {
-    chart.data.datasets[0].data.length = 0;
-    chart.data.labels.length = 0;
- }
-
-function saveDataToLocalStorage(data)
-{
+function saveDataToLocalStorage(data) {
     resultsArray = JSON.parse(localStorage.getItem("Results")) || [];
-    resultsArray.push(data);
 
+    resultsArray.push(data);
     localStorage.setItem("Results", JSON.stringify(resultsArray));
 }
 
 function renderCompleteResults(table) {
     const resultsData = JSON.parse(localStorage.getItem("Results"));
+
     if (resultsData != null) {
         for (result of resultsData) {
             const resultsRow = document.createElement("tr");
@@ -289,6 +301,12 @@ function renderCompleteResults(table) {
 
 function renderNewResult(table) {
     const resultsData = JSON.parse(localStorage.getItem("Results"));
+
+    const tableWPMElement = document.getElementById("table-wpm");
+    const tableErrorsElement = document.getElementById("table-errors");
+    const tableAccuracylement = document.getElementById("table-accuracy");
+    const tableTimeElement = document.getElementById("table-time");
+
     if (resultsData != null) {
         console.log(resultsData.at(-1));
             const resultsRow = document.createElement("tr");
@@ -297,23 +315,54 @@ function renderNewResult(table) {
                                     <td>${resultsData.at(-1).accuracy.toFixed(2)} %</td>
                                     <td>${formatTime(resultsData.at(-1).time)}</td>`;
             table.appendChild(resultsRow);
+
+            tableWPMElement.textContent = resultsData.at(-1).wpm;
+            tableErrorsElement.textContent = resultsData.at(-1).errors;
+            tableAccuracylement.textContent = resultsData.at(-1).accuracy.toFixed(2);
+            tableTimeElement.textContent = resultsData.at(-1).time;
     }
 }
 
-function addDataToChart(chart, label, data) {
+function addDataToChart(chart, label, data1, data2) {
     chart.data.labels.push(label);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(data);
-    });
+    chart.data.datasets[0].data.push(data1);
+    chart.data.datasets[1].data.push(data2);
+
     myChart.update();
 }
 
-renderTime(timeRemaining);
-attachListenerToTimers();
-renderNewQuote();
-renderCompleteResults(resultsTabelElement);
+function removeData(chart) {
+    chart.data.datasets[0].data.length = 0;
+    chart.data.datasets[1].data.length = 0;
+    chart.data.labels.length = 0;
+ }
+
+// ----------------------- Listeners ----------------------- //
+
+inputBoxElement.addEventListener("input", handleText);
+inputBoxElement.addEventListener("keydown", addTimer, {once : true});
+
+inputBoxElement.addEventListener("keydown", ({key}) => {
+    const quoteArray = quoteTextElement.querySelectorAll(".char")
+    const inputArray = inputBoxElement.value.split("");
+    
+    for (let [index, quoteCharacterElement] of quoteArray.entries()) {
+        const inputCharacter = inputArray[index];
+        if ((inputCharacter!= null) && ["Backspace", "Delete"].includes(key)) {
+            quoteArray[index + 1].classList.remove("highlight");
+            quoteCharacterElement.classList.add("highlight");
+        }
+    }
+});
+
+function removeResults() {
+    localStorage.clear();
+    resultsTableElement.innerHTML = "";
+}
 
 restartButtonElement.addEventListener("click", resetManual);
+deleteResultsElement.addEventListener("click", removeResults);
+
 
 focusModeElement.addEventListener("click", () => {
     focusModeElement.classList.toggle("selected");
@@ -326,4 +375,11 @@ inputModeElement.addEventListener("click", () => {
     inputBoxElement.classList.toggle("input-visible");
     inputBoxElement.focus();
 });
+
+// ----------------------- Listeners ----------------------- //
+
+renderTime(timeRemaining);
+attachListenerToTimers();
+renderNewQuote();
+renderCompleteResults(resultsTableElement);
 
