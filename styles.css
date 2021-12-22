@@ -104,14 +104,8 @@ p, h1, h2, h3, h4, h5, h6, th {
   width: 100%;
 }
 
-.quote {
-  width: 68ch;
-  cursor: default;
-  user-select: none;
-}
-
 .box {
-  padding: 0.7rem;
+  padding: 0.3rem 0.7rem;
   margin: 0.3rem;
   
   color: var(--color-white);
@@ -119,6 +113,13 @@ p, h1, h2, h3, h4, h5, h6, th {
   
   border: none;
   border-radius: 0.4rem;
+}
+
+.quote {
+  width: 68ch;
+  padding: 0.8rem;
+  cursor: default;
+  user-select: none;
 }
 
 img {
@@ -131,7 +132,7 @@ img {
   background: var(--color-violet);
 }
 
-.input, .restart {
+.restart {
   transition: 150ms ease-in-out;
 }
 
@@ -145,7 +146,7 @@ img {
 
 .input {
   width: 99%;
-  height: 3.6rem;
+  height: 3.5rem;
   padding-top: 0.4rem;
 
   caret-color: var(--color-violet);
@@ -155,6 +156,7 @@ img {
   resize: none;
   overflow: hidden;
   white-space: nowrap;
+  transition: opacity 400ms ease-in-out;
 }
 
 .input:hover, .input:focus {
@@ -164,7 +166,8 @@ img {
 
 .options {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .option-box {
@@ -185,10 +188,10 @@ img {
   background-color: var(--color-grey-light);
 }
 
-/* ---------- RESULTS TABLE ---------- */
-
 .results-container {
-  align-self: flex-start;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   width: 68ch;
   margin: 1rem;
   border-top: thin solid var(--color-grey-light);
@@ -208,32 +211,24 @@ img {
   opacity: 0;
 }
 
+.input-visible {
+  height: 0;
+  width: 0;
+  margin-top: -5rem;
+  position: absolute;
+  z-index: -5;
+  opacity: 0;
+  cursor: none;
+}
+
+/* ---------- RESULTS TABLE ---------- */
+
 .table {
   min-width: 40ch;
   margin: 25px 0;
   font-size: 1.1rem;
   border-collapse: collapse;
-}
-
-.table thead tr {
-  background-color: var(--color-violet);
   text-align: left;
-}
-
-.table thead th {
-  padding: 0.1rem 0.6rem;
-}
-
-.table thead tr:first-child th:first-child, 
-.table tbody tr:nth-of-type(even) td:first-of-type {
-  border-top-left-radius: 0.4rem;
-  border-bottom-left-radius: 0.4rem;
-}
-
-.table tr:first-child th:last-child,
-.table tbody tr:nth-of-type(even) td:last-of-type {
-  border-top-right-radius: 0.4rem;
-  border-bottom-right-radius: 0.4rem;
 }
 
 .table tbody th:nth-of-type(even),
@@ -241,13 +236,52 @@ img {
     padding: 0.1rem 0.6rem;
 }
 
-.table tbody tr:nth-of-type(even) {
+.last-result {
+  min-width: 30ch;
+  font-size: 1.3rem;
+}
+
+.last-result th {
+  padding: 0.1rem 0.6rem;
+  border-top-left-radius: 0.4rem;
+  border-bottom-left-radius: 0.4rem;
+  letter-spacing: 0.1rem;
+}
+
+.last-result tr:first-child th:last-child,
+.last-result tr:nth-of-type(odd) td:last-of-type {
+  border-top-right-radius: 0.4rem;
+  border-bottom-right-radius: 0.4rem;
+}
+
+.last-result tbody tr:nth-of-type(odd) {
   background-color: var(--color-grey);
 }
 
-.table tbody tr:last-of-type {
-  border-bottom: 2px solid var(--color-violet-light);
+.complete-result thead th {
+  padding: 0.1rem 0.6rem;
+  background-color: var(--color-violet);
 }
+
+.complete-result  thead tr:first-child th:first-child, 
+.complete-result  tbody tr:nth-of-type(even) td:first-of-type {
+  border-top-left-radius: 0.4rem;
+  border-bottom-left-radius: 0.4rem;
+}
+
+.complete-result  thead tr:first-child th:last-child,
+.complete-result tbody tr:nth-of-type(even) td:last-of-type {
+  border-top-right-radius: 0.4rem;
+  border-bottom-right-radius: 0.4rem;
+}
+
+.complete-result tbody tr:nth-of-type(even) {
+  background-color: var(--color-grey);
+}
+
+/* .complete-result tbody tr:last-of-type {
+  border-bottom: 2px solid var(--color-violet-light);
+} */
 
 /* ---------- RESULTS TABLE ---------- */
 

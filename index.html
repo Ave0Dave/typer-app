@@ -8,9 +8,9 @@
     <link rel="icon" href="typer-icon.png" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="styles.css">
     <script src="script.js" async></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js" integrity="sha512-tMabqarPtykgDtdtSqCL3uLVM0gS1ZkUAVhRFu1vSEFgvB73niFQWJuvviDyBGBH22Lcau4rHB5p2K2T0Xvr6Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
     <title>TYPER</title>
   </head>
@@ -21,34 +21,65 @@
       <div class="typing-container">
         <div class="statistics-wrapper">
           <div id="current-wpm" class="wpm box">0 <span class="small">WPM</span></div>
-  
-            <div id="current-time" class="box">00 : 00</div>
-     
+          
+          <div id="current-time" class="box">00 : 00</div>
+          
             <div id="current-errors" class="errors box">0 <span class="small">Errors</span></div>
-  
+            
             <div id="current-accuracy" class="accuracy box">0 <span class="small">%</span></div>
-  
+            
             <button id="restart-button" class="restart box">
               <img id="restart-icon" src="restart-icon.svg">
             </button>
-        </div>
-  
-        <p id="qoute-text" class="quote box">⌛ Loading text.</p>
+          </div>
+          
+          <p id="qoute-text" class="quote box">⌛ Loading text.</p>
           
         <textarea id="input-box" class="input box" placeholder="Start typing here."></textarea>
         
         <div class="options">
-          <button id="timer-10" class="timer option-box">00:10</button>
-          <button id="timer-30" class="timer option-box selected">00:30</button>
-          <button id="timer-100" class="timer option-box">01:00</button>
-          <button id="timer-200" class="timer option-box">02:00</button>
-          <button id="timer-500" class="timer option-box">05:00</button>
-          <button id="focus-mode" class="option-box">💡</button>
+          <div class="options-left">
+            <button id="focus-mode" class="option-box">💡</button>
+            <button id="input-mode" class="option-box">⌨️</button>
+          </div>
+
+          <div class="options-right">
+            <button id="timer-10" class="timer option-box">00:10</button>
+            <button id="timer-30" class="timer option-box selected">00:30</button>
+            <button id="timer-100" class="timer option-box">01:00</button>
+            <button id="timer-200" class="timer option-box">02:00</button>
+            <button id="timer-500" class="timer option-box">05:00</button>
+          </div>
         </div>
       </div>
 
       <div class="results-container">
-        <table class="table">
+        <div>
+          <div>
+            <canvas id="myChart"></canvas>
+          </div>
+          
+          <table class="table last-result">
+            <tr id="table-wpm">
+              <th>WPM</th>
+              <td>00</td>
+            </tr>
+            <tr id="table-errors">
+              <th>Errors</th>
+              <td>00</td>
+            </tr>
+            <tr id="table-accuracy">
+              <th>Accuracy</th>
+              <td>00</td>
+            </tr>
+            <tr id="table-time">
+              <th>Time</th>
+              <td>00</td>
+            </tr>
+          </table>
+        </div>
+        
+        <table class="table complete-result">
           <thead>
             <tr>
               <th>WPM</th>
@@ -58,11 +89,9 @@
             </tr>
           </thead>
           <tbody id="results-table">
-
           </tbody>
         </table>
       </div>
-
-    </main>  
+    </main> 
   </body>
 </html>
