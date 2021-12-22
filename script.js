@@ -52,16 +52,13 @@ const data = {
     }]
 };
 
-let config = {
+const config = {
     type: 'line',
     data: data,
     options: {}
 };
 
-if (JSON.parse(localStorage.getItem("Config") != null)) {
- config = JSON.parse(localStorage.getItem("Config"));
-}
-
+//MAKE THE FAKING CHART INTO LOCAL STORAGE
 let myChart = new Chart(document.getElementById("myChart"), config);
 
 function getRandomQuote() {
@@ -166,18 +163,11 @@ function updateTimer() {
         currentWPMElement.innerHTML = `${wordsPerMinute} <span class="small">WPM</span>`;
         
     } else {
-        myChart.update();
-        console.log(config);
-        localStorage.setItem("Config", JSON.stringify(config));
-        removeData(myChart);
-        myChart.destroy();
-        myChart = new Chart(document.getElementById('myChart'), config);
-        myChart.update();
-
         let result = new Result(wordsPerMinute, errorsTotal + currentErrors, currentAccuracy, selectedTimer);
         saveDataToLocalStorage(result);
         renderNewResult(resultsTabelElement);
         resetInstance();
+        running = false;
     }
 }
 
@@ -226,6 +216,7 @@ function attachListenerToTimers() {
                 currentTimeElement.classList.remove("blink");
             });
 
+            running = false;
             selectedTimer = timeRemaining; 
             currentTimeElement.innerText = formatTime(selectedTimer);
         });
@@ -263,7 +254,16 @@ function resetManual() {
     inputBoxElement.disabled = false;
     inputBoxElement.style.cursor = "text";
     inputBoxElement.focus();
+
+    myChart.destroy();
+    removeData(myChart);
+    myChart = new Chart(document.getElementById('myChart'), config);
 }
+
+function removeData(chart) {
+    chart.data.datasets[0].data.length = 0;
+    chart.data.labels.length = 0;
+ }
 
 function saveDataToLocalStorage(data)
 {
@@ -305,19 +305,8 @@ function addDataToChart(chart, label, data) {
     chart.data.datasets.forEach((dataset) => {
         dataset.data.push(data);
     });
+    myChart.update();
 }
-
-function removeData(chart) {
-    while (chart.data.labels.length != 0) {
-        chart.data.labels.pop();
-    }
-    
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.pop();
-    });
-    chart.update();
-}
- 
 
 renderTime(timeRemaining);
 attachListenerToTimers();
