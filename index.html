@@ -17,7 +17,10 @@
   <body>
     <div id="overlay" class="overlay-visible"></div>
     <main class="app-container">
-      <h1 class="site-name">Typer ⌨️</h1>
+      <header>
+        <h1 class="site-name">Typer ⌨️</h1>
+        <p>David Červenec</p>
+      </header>
       <div class="typing-container">
         <div class="statistics-wrapper">
           <div id="current-wpm" class="wpm box">0 <span class="small">WPM</span></div>
@@ -76,7 +79,7 @@
             </tr>
           </table>
         </div>
-          
+        
         <table class="table complete-result">
           <thead>
             <tr>
@@ -87,10 +90,8 @@
               <th class="delete-button"><button id="delete-results" aria-label="Delete All Results">❌</button></th>
             </tr>
           </thead>
-          <tbody id="results-table">
-          </tbody>
+          <tbody id="results-table"></tbody>
         </table>
-
       </div>
     </main> 
   </body>

@@ -229,6 +229,7 @@ function attachListenerToTimers() {
                 timer.classList.remove("selected");
             }
             e.target.classList.add("selected");
+            inputBoxElement.focus();
             
             currentTimeElement.classList.add("blink");
             const blink = document.querySelector(".blink");
