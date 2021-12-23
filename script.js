@@ -1,5 +1,5 @@
 const TimeLimit = {
-    time10 : 5,
+    time10 : 10,
     time30: 30,
     time100: 60,
     time200: 120,
@@ -72,11 +72,13 @@ const currentTimeElement = document.getElementById("current-time");
 const currentErrorsElement = document.getElementById("current-errors");
 const currentAccuracyElement = document.getElementById("current-accuracy");
 const restartButtonElement = document.getElementById("restart-button");
-const focusModeElement = document.getElementById("focus-mode");
-const inputModeElement = document.getElementById("input-mode");
 const deleteResultsElement = document.getElementById("delete-results");
+
 const resultsData = JSON.parse(localStorage.getItem("Results"));
 const resultsTableElement = document.getElementById("results-table");
+
+const focusModeElement = document.getElementById("focus-mode");
+const inputModeElement = document.getElementById("input-mode");
 
 const tableWPMElement = document.getElementById("table-wpm");
 const tableErrorsElement = document.getElementById("table-errors");

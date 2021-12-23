@@ -2,8 +2,8 @@
 :root {
     --color-black: #121212;
     --color-white: #f7f7f7;
-    --color-grey: #222222;
-    --color-grey-light: #515151;
+    --color-grey: #1a1a1a;
+    --color-grey-light: #3d3d3d;
     --color-green: #A3BE8C;
     --color-red: #BF616A;
     --color-violet: #5f43b2;
@@ -213,20 +213,18 @@ img {
 }
 
 .input-visible {
-  height: 0;
-  width: 0;
-  margin-top: -4rem;
   position: absolute;
-  z-index: -5;
+  margin-top: -4rem;
   opacity: 0;
   cursor: none;
+  visibility: hidden;
 }
 
 /* ---------- RESULTS TABLE ---------- */
 
 .table {
   min-width: 40ch;
-  margin: 25px 0;
+  margin: 2rem 0;
   font-size: 1.1rem;
   border-collapse: collapse;
   text-align: left;
@@ -238,6 +236,7 @@ img {
 }
 
 .last-result {
+  width: 100%;
   min-width: 30ch;
   font-size: 1.2rem;
 }
@@ -353,43 +352,4 @@ img {
   color: #9880ff;
   animation: dotFlashing 1s infinite linear alternate;
   animation-delay: .5s;
-}
-
-.dot-flashing::before, .dot-flashing::after {
-  content: '';
-  display: inline-block;
-  position: absolute;
-  top: 0;
-}
-
-.dot-flashing::before {
-  left: -15px;
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
-  background-color: #9880ff;
-  color: #9880ff;
-  animation: dotFlashing 1s infinite alternate;
-  animation-delay: 0s;
-}
-
-.dot-flashing::after {
-  left: 15px;
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
-  background-color: #9880ff;
-  color: #9880ff;
-  animation: dotFlashing 1s infinite alternate;
-  animation-delay: 1s;
-}
-
-@keyframes dotFlashing {
-  0% {
-    background-color: #9880ff;
-  }
-  50%,
-  100% {
-    background-color: #ebe6ff;
-  }
 }
