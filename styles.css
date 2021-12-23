@@ -46,6 +46,7 @@ html {
 body {
   display: flex;
   justify-content: center; 
+  padding-left: calc(100vw - 100%);
 
   font-family: 'Nunito', sans-serif;
   font-size: 1.5rem;
@@ -75,14 +76,14 @@ p, h1, h2, h3, h4, h5, h6, th {
   font-weight: normal;
 }
 
+#root, #__next {
+  isolation: isolate;
+}
+
 .site-name {
   padding: 1rem;
   border-radius: 0.4rem;
   background: var(--color-violet);
-}
-
-#root, #__next {
-  isolation: isolate;
 }
 
 .app-container {
@@ -90,7 +91,7 @@ p, h1, h2, h3, h4, h5, h6, th {
   flex-flow: column;
   align-items: center;
   padding-top: 5rem;
-  max-width: 70ch;
+  max-width: 60ch;
 }
 
 .typing-container {
@@ -112,11 +113,11 @@ p, h1, h2, h3, h4, h5, h6, th {
   background-color: var(--color-grey);
   
   border: none;
-  border-radius: 0.4rem;
+  border-radius: 0.7rem;
 }
 
 .quote {
-  width: 68ch;
+  width: 58ch;
   padding: 0.8rem;
   cursor: default;
   user-select: none;
@@ -130,9 +131,6 @@ img {
 .restart {
   border: 2px solid transparent;
   background: var(--color-violet);
-}
-
-.restart {
   transition: 150ms ease-in-out;
 }
 
@@ -177,7 +175,7 @@ img {
   background-color: var(--color-grey);
   
   border: none;
-  border-radius: 0.4rem;
+  border-radius: 0.7rem;
   transition: 250ms ease-in-out;
 }
 
@@ -189,7 +187,7 @@ img {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  width: 68ch;
+  width: 58ch;
   margin: 1rem;
   border-top: thin solid var(--color-grey-light);
 }
@@ -199,7 +197,7 @@ img {
 }
 
 #overlay {
-  height: 200vh;
+  height: 100%;
   width: 100%;
 
   position: absolute;
@@ -241,20 +239,20 @@ img {
 
 .last-result {
   min-width: 30ch;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
 }
 
 .last-result th {
   padding: 0.1rem 0.6rem;
-  border-top-left-radius: 0.4rem;
-  border-bottom-left-radius: 0.4rem;
+  border-top-left-radius: 0.7rem;
+  border-bottom-left-radius: 0.7rem;
   letter-spacing: 0.1rem;
 }
 
 .last-result tr:first-child th:last-child,
 .last-result tr:nth-of-type(odd) td:last-of-type {
-  border-top-right-radius: 0.4rem;
-  border-bottom-right-radius: 0.4rem;
+  border-top-right-radius: 0.7rem;
+  border-bottom-right-radius: 0.7rem;
 }
 
 .last-result tbody tr:nth-of-type(odd) {
@@ -268,14 +266,14 @@ img {
 
 .complete-result  thead tr:first-child th:first-child, 
 .complete-result  tbody tr:nth-of-type(even) td:first-of-type {
-  border-top-left-radius: 0.4rem;
-  border-bottom-left-radius: 0.4rem;
+  border-top-left-radius: 0.7rem;
+  border-bottom-left-radius: 0.7rem;
 }
 
 .complete-result  thead tr:first-child th:last-child,
 .complete-result tbody tr:nth-of-type(even) td:last-of-type {
-  border-top-right-radius: 0.4rem;
-  border-bottom-right-radius: 0.4rem;
+  border-top-right-radius: 0.7rem;
+  border-bottom-right-radius: 0.7rem;
 }
 
 .complete-result tbody tr:nth-of-type(even) {
@@ -317,11 +315,15 @@ img {
 
 .highlight {
   background: var(--color-grey-light);
-  border-radius: 0.1rem;
+  border-radius: 0.2rem;
 }
 
 .disabled {
   pointer-events: none; 
+}
+
+.scroll-disabled {
+  overflow: hidden;
 }
 
 .selected {
@@ -340,4 +342,54 @@ img {
 
 .blink {
   animation: 600ms blink ease-in-out
+}
+
+.dot-flashing {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #9880ff;
+  color: #9880ff;
+  animation: dotFlashing 1s infinite linear alternate;
+  animation-delay: .5s;
+}
+
+.dot-flashing::before, .dot-flashing::after {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 0;
+}
+
+.dot-flashing::before {
+  left: -15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #9880ff;
+  color: #9880ff;
+  animation: dotFlashing 1s infinite alternate;
+  animation-delay: 0s;
+}
+
+.dot-flashing::after {
+  left: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #9880ff;
+  color: #9880ff;
+  animation: dotFlashing 1s infinite alternate;
+  animation-delay: 1s;
+}
+
+@keyframes dotFlashing {
+  0% {
+    background-color: #9880ff;
+  }
+  50%,
+  100% {
+    background-color: #ebe6ff;
+  }
 }

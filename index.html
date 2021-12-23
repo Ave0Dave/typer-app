@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="icon" href="typer-icon.png" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="styles.css">
-    <script src="script.js" async></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js" integrity="sha512-tMabqarPtykgDtdtSqCL3uLVM0gS1ZkUAVhRFu1vSEFgvB73niFQWJuvviDyBGBH22Lcau4rHB5p2K2T0Xvr6Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="script.js" async></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
@@ -28,53 +28,51 @@
             
             <div id="current-accuracy" class="accuracy box">0 <span class="small">%</span></div>
             
-            <button id="restart-button" class="restart box">
-              <img id="restart-icon" src="restart-icon.svg">
+            <button id="restart-button" class="restart box" aria-label="Quote Reset">
+              <img id="restart-icon" src="restart-icon.svg" alt="Restart icon" height="30" width="30">
             </button>
           </div>
           
-          <p id="qoute-text" class="quote box">⌛ Loading text.</p>
+        <p id="qoute-text" class="quote box"></p>
           
         <textarea id="input-box" class="input box" placeholder="Start typing here."></textarea>
         
         <div class="options">
           <div class="options-left">
-            <button id="focus-mode" class="option-box">💡</button>
-            <button id="input-mode" class="option-box">⌨️</button>
+            <button id="focus-mode" class="option-box" aria-label="Focus Mode">💡</button>
+            <button id="input-mode" class="option-box" aria-label="Input Mode">⌨️</button>
           </div>
 
           <div class="options-right">
-            <button id="timer-10" class="timer option-box">00:10</button>
-            <button id="timer-30" class="timer option-box selected">00:30</button>
-            <button id="timer-100" class="timer option-box">01:00</button>
-            <button id="timer-200" class="timer option-box">02:00</button>
-            <button id="timer-500" class="timer option-box">05:00</button>
+            <button id="timer-10" class="timer option-box" aria-label="Timer 10 seconds">00:10</button>
+            <button id="timer-30" class="timer option-box selected" aria-label="Timer 30 seconds">00:30</button>
+            <button id="timer-100" class="timer option-box" aria-label="Timer 1 Minute">01:00</button>
+            <button id="timer-200" class="timer option-box" aria-label="Timer 2 Minutes">02:00</button>
+            <button id="timer-500" class="timer option-box" aria-label="Timer 5 Minutes">05:00</button>
           </div>
         </div>
       </div>
 
       <div class="results-container">
         <div class="last-result-wrapper">
-          <div>
-            <canvas id="myChart"></canvas>
-          </div>
+          <canvas id="myChart" height="100" width="200"></canvas>
           
           <table class="table last-result">
             <tr>
               <th>WPM</th>
-              <td id="table-wpm">00</td>
+              <td id="table-wpm">-</td>
             </tr>
             <tr>
               <th>Errors</th>
-              <td id="table-errors">00</td>
+              <td id="table-errors">-</td>
             </tr>
             <tr>
               <th>Accuracy</th>
-              <td id="table-accuracy">00</td>
+              <td id="table-accuracy">-</td>
             </tr>
             <tr>
               <th>Time</th>
-              <td id="table-time">00</td>
+              <td id="table-time">-</td>
             </tr>
           </table>
         </div>
@@ -86,7 +84,7 @@
               <th>Errors</th>
               <th>Accuracy</th>
               <th>Time</th>
-              <th class="delete-button"><button id="delete-results">❌</button></th>
+              <th class="delete-button"><button id="delete-results" aria-label="Delete All Results">❌</button></th>
             </tr>
           </thead>
           <tbody id="results-table">

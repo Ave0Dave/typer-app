@@ -15,34 +15,6 @@ const Result = function(wpm, errors, accuracy, time) {
     };
 }
 
-const quoteTextElement = document.getElementById("qoute-text");
-const currentWPMElement = document.getElementById("current-wpm");
-const currentTimeElement = document.getElementById("current-time");
-const currentErrorsElement = document.getElementById("current-errors");
-const currentAccuracyElement = document.getElementById("current-accuracy");
-const inputBoxElement = document.getElementById("input-box");
-const restartButtonElement = document.getElementById("restart-button");
-const resultsTableElement = document.getElementById("results-table");
-const focusModeElement = document.getElementById("focus-mode");
-const inputModeElement = document.getElementById("input-mode");
-const deleteResultsElement = document.getElementById("delete-results");
-
-const timerArray = document.querySelectorAll(".timer");
-
-let selectedTimer = TimeLimit.time30;
-let timeRemaining = selectedTimer;
-let timeElapsed = 0;
-let errorsTotal = 0;
-let currentAccuracy;
-let currentErrors;
-let charactersTyped = 0;
-let charactersCorrect = 0;
-let wordsPerMinute = 0;
-let timer;
-let degrees = 0;
-let resultsArray = [];
-let running = false;
-
 const data = {
     labels: [],
     datasets: [
@@ -93,31 +65,60 @@ const config = {
     }
 };
 
+const quoteTextElement = document.getElementById("qoute-text");
+const inputBoxElement = document.getElementById("input-box");
+const currentWPMElement = document.getElementById("current-wpm");
+const currentTimeElement = document.getElementById("current-time");
+const currentErrorsElement = document.getElementById("current-errors");
+const currentAccuracyElement = document.getElementById("current-accuracy");
+const restartButtonElement = document.getElementById("restart-button");
+const focusModeElement = document.getElementById("focus-mode");
+const inputModeElement = document.getElementById("input-mode");
+const deleteResultsElement = document.getElementById("delete-results");
+const resultsData = JSON.parse(localStorage.getItem("Results"));
+const resultsTableElement = document.getElementById("results-table");
+
+const tableWPMElement = document.getElementById("table-wpm");
+const tableErrorsElement = document.getElementById("table-errors");
+const tableAccuracylement = document.getElementById("table-accuracy");
+const tableTimeElement = document.getElementById("table-time");
+
+let timer = 0;
+let selectedTimer = TimeLimit.time30;
+let timeRemaining = selectedTimer;
+let timeElapsed = 0;
+let errorsTotal = 0;
+let wordsPerMinute = 0;
+let currentErrors = 0;
+let currentAccuracy = 0;
+let charactersTyped = 0;
+let charactersCorrect = 0;
+let degrees = 0;
+let resultsArray = resultsData;
+let running = false;
+
 let myChart = new Chart(document.getElementById("myChart"), config);
 
 function getRandomQuote() {
-    return fetch("https://api.quotable.io/random?minLength=90&&maxLength=130")
+    return fetch("https://api.quotable.io/random?minLength=80&&maxLength=130")
         .then(response => response.json())
         .then(data => data.content.toLowerCase());
 }
 
-//TODO: Remove forEach
 async function renderNewQuote() {
     const quote = await getRandomQuote();
     quoteTextElement.innerHTML = "";
 
-    quote.split("").forEach((character) => {
+    for (character of quote.split("")) {
         const quoteCharacter = document.createElement("span");
         quoteCharacter.className = "char";
         quoteCharacter.innerText = character;
         quoteTextElement.appendChild(quoteCharacter);
-    })
+    }
+
     inputBoxElement.value = "";
 }
 
-//TODO: Clear word after whitespace
-//TODO: Stop inputText from moving
-//TODO: If errors before space dont proceed to another word
 function handleText() { 
     running = true;
     const quoteArray = quoteTextElement.querySelectorAll(".char")
@@ -182,7 +183,7 @@ function updateTimer() {
     } else {
         let result = new Result(wordsPerMinute, errorsTotal + currentErrors, currentAccuracy, selectedTimer);
         saveDataToLocalStorage(result);
-        renderNewResult(resultsTableElement);
+        renderNewResult(resultsTableElement, resultsData);
         resetInstance();
         running = false;
     }
@@ -201,13 +202,13 @@ function renderTime(time) {
 }
 
 function attachListenerToTimers() {
+    const timerArray = document.querySelectorAll(".timer");
+
     for (timer of timerArray) {
         timer.addEventListener("click", (e) => {
             if (running) {
                 resetManual();
             }
-
-            const selectedTimersArray = document.querySelectorAll(".timer");
             
             switch (e.target.id) {
                 case "timer-10": timeRemaining = TimeLimit.time10;
@@ -222,7 +223,7 @@ function attachListenerToTimers() {
                 break;
             }
             
-            for (timer of selectedTimersArray) {
+            for (timer of timerArray) {
                 timer.classList.remove("selected");
             }
             e.target.classList.add("selected");
@@ -242,12 +243,16 @@ function attachListenerToTimers() {
 
 function resetInstance() {  
     renderNewQuote();
-   
     clearInterval(timer);
+    
     inputBoxElement.addEventListener("keydown", addTimer, {once : true});
-    inputBoxElement.disabled = true;
     inputBoxElement.style.cursor = "not-allowed";
-
+    inputBoxElement.disabled = true;
+    
+    currentWPMElement.innerHTML = '0 <span class="small">WPM</span>';
+    currentErrorsElement.innerHTML = '0 <span class="small">Errors</span>';
+    currentAccuracyElement.innerHTML = '0 <span class="small">%</span>';
+    
     timeRemaining = selectedTimer;
     timeElapsed = 0;
     wordsPerMinute = 0;
@@ -255,13 +260,9 @@ function resetInstance() {
     currentErrors = 0;
     charactersTyped = 0;
     currentAccuracy = 0;
-
-    renderTime(timeRemaining);
-    currentWPMElement.innerHTML = '0 <span class="small">WPM</span>';
-    currentErrorsElement.innerHTML = '0 <span class="small">Errors</span>';
-    currentAccuracyElement.innerHTML = '0 <span class="small">%</span>';
-
     degrees += 360;
+    
+    renderTime(timeRemaining);
     const restartIconElement = document.getElementById("restart-icon");
     restartIconElement.style.transform = `rotate(${degrees}deg)`;
 }
@@ -273,9 +274,11 @@ function resetManual() {
     inputBoxElement.focus();
 
     myChart.destroy();
-    removeData(myChart);
+    removeDataFromChart(myChart);
     myChart = new Chart(document.getElementById('myChart'), config);
 }
+
+// ----------------------- Data handlers ----------------------- //
 
 function saveDataToLocalStorage(data) {
     resultsArray = JSON.parse(localStorage.getItem("Results")) || [];
@@ -284,11 +287,28 @@ function saveDataToLocalStorage(data) {
     localStorage.setItem("Results", JSON.stringify(resultsArray));
 }
 
-function renderCompleteResults(table) {
-    const resultsData = JSON.parse(localStorage.getItem("Results"));
+function addDataToChart(chart, label, data1, data2) {
+    chart.data.labels.push(label);
+    chart.data.datasets[0].data.push(data1);
+    chart.data.datasets[1].data.push(data2);
 
-    if (resultsData != null) {
-        for (result of resultsData) {
+    myChart.update();
+}
+
+function removeDataFromChart(chart) {
+    for (dataset of chart.data.datasets) {
+        dataset.data.length = 0
+    }
+    chart.data.labels.length = 0;
+}
+
+// ----------------------- Data handlers ----------------------- //
+
+// ----------------------- Result handlers ----------------------- //
+
+function renderCompleteResults(table, data) {
+    if (data != null) {
+        for (result of data) {
             const resultsRow = document.createElement("tr");
             resultsRow.innerHTML = `<td>${result.wpm}</td>
                                     <td>${result.errors}</td>
@@ -302,13 +322,7 @@ function renderCompleteResults(table) {
 function renderNewResult(table) {
     const resultsData = JSON.parse(localStorage.getItem("Results"));
 
-    const tableWPMElement = document.getElementById("table-wpm");
-    const tableErrorsElement = document.getElementById("table-errors");
-    const tableAccuracylement = document.getElementById("table-accuracy");
-    const tableTimeElement = document.getElementById("table-time");
-
     if (resultsData != null) {
-        console.log(resultsData.at(-1));
             const resultsRow = document.createElement("tr");
             resultsRow.innerHTML = `<td>${resultsData.at(-1).wpm}</td>
                                     <td>${resultsData.at(-1).errors}</td>
@@ -319,28 +333,23 @@ function renderNewResult(table) {
             tableWPMElement.textContent = resultsData.at(-1).wpm;
             tableErrorsElement.textContent = resultsData.at(-1).errors;
             tableAccuracylement.textContent = resultsData.at(-1).accuracy.toFixed(2);
-            tableTimeElement.textContent = resultsData.at(-1).time;
+            tableTimeElement.textContent = formatTime(resultsData.at(-1).time);
     }
 }
 
-function addDataToChart(chart, label, data1, data2) {
-    chart.data.labels.push(label);
-    chart.data.datasets[0].data.push(data1);
-    chart.data.datasets[1].data.push(data2);
-
-    myChart.update();
+function removeResults() {
+    localStorage.clear();
+    resultsTableElement.innerHTML = "";
 }
 
-function removeData(chart) {
-    chart.data.datasets[0].data.length = 0;
-    chart.data.datasets[1].data.length = 0;
-    chart.data.labels.length = 0;
- }
+// ----------------------- Result handlers ----------------------- //
 
 // ----------------------- Listeners ----------------------- //
 
 inputBoxElement.addEventListener("input", handleText);
 inputBoxElement.addEventListener("keydown", addTimer, {once : true});
+restartButtonElement.addEventListener("click", resetManual);
+deleteResultsElement.addEventListener("click", removeResults);
 
 inputBoxElement.addEventListener("keydown", ({key}) => {
     const quoteArray = quoteTextElement.querySelectorAll(".char")
@@ -355,19 +364,12 @@ inputBoxElement.addEventListener("keydown", ({key}) => {
     }
 });
 
-function removeResults() {
-    localStorage.clear();
-    resultsTableElement.innerHTML = "";
-}
-
-restartButtonElement.addEventListener("click", resetManual);
-deleteResultsElement.addEventListener("click", removeResults);
-
-
 focusModeElement.addEventListener("click", () => {
     focusModeElement.classList.toggle("selected");
     const overlayElement = document.getElementById("overlay");
     overlayElement.classList.toggle("overlay-visible");
+    document.body.classList.toggle("scroll-disabled");
+    window.scrollTo(0, 0); 
 });
 
 inputModeElement.addEventListener("click", () => {
@@ -376,10 +378,16 @@ inputModeElement.addEventListener("click", () => {
     inputBoxElement.focus();
 });
 
+window.addEventListener("keydown", function(e) {
+    if(e.key == " " && e.target == document.body) {
+        e.preventDefault();
+    }
+});
+
 // ----------------------- Listeners ----------------------- //
 
 renderTime(timeRemaining);
 attachListenerToTimers();
 renderNewQuote();
-renderCompleteResults(resultsTableElement);
+renderCompleteResults(resultsTableElement, resultsData);
 
