@@ -193,7 +193,6 @@ img {
   justify-content: space-between;
   align-items: flex-start;
   width: 58ch;
-  margin: 1rem;
   border-top: thin solid var(--color-grey-light);
 }
 
@@ -231,7 +230,7 @@ img {
 
 .table {
   min-width: 40ch;
-  margin: 2rem 0;
+  margin: 2rem 0 0 0;
   font-size: 1.1rem;
   border-collapse: collapse;
   text-align: left;
@@ -354,15 +353,4 @@ footer {
 
 .blink {
   animation: 600ms blink ease-in-out
-}
-
-.dot-flashing {
-  position: relative;
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
-  background-color: #9880ff;
-  color: #9880ff;
-  animation: dotFlashing 1s infinite linear alternate;
-  animation-delay: .5s;
 }
