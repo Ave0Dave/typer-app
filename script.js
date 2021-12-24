@@ -89,11 +89,11 @@ let timer = 0;
 let selectedTimer = TimeLimit.time30;
 let timeRemaining = selectedTimer;
 let timeElapsed = 0;
-let errorsTotal = 0;
 let wordsPerMinute = 0;
-let currentErrors = 0;
+let errorsTotal = 0;
 let currentAccuracy = 0;
 let charactersTyped = 0;
+let realCharactersTyped = 0;
 let charactersCorrect = 0;
 let degrees = 0;
 let resultsArray = resultsData;
@@ -101,7 +101,6 @@ let running = false;
 
 let charIndex = 0;
 let wordIndex = 0;
-let reverse = false;
 let currentIndex = 0;
 
 let myChart = new Chart(document.getElementById("myChart"), config);
@@ -133,104 +132,96 @@ async function renderNewQuote() {
     inputBoxElement.value = "";
 }
 
-// function getRandomQuote() {
-//     return fetch("https://api.quotable.io/random?minLength=80&&maxLength=130")
-//         .then(response => response.json())
-//         .then(data => data.content.toLowerCase());
-// }
-
-// async function renderNewQuote() {
-//     const quote = await getRandomQuote();
-//     quoteTextElement.innerHTML = "";
-
-//     for (character of quote.split("")) {
-//         const quoteCharacter = document.createElement("span");
-//         quoteCharacter.className = "char";
-//         quoteCharacter.innerText = character;
-//         quoteTextElement.appendChild(quoteCharacter);
-//     }
-
-//     inputBoxElement.value = "";
-// }
-
-const checkWord = (e) => {
+const handleText = (e) => {
     running = true;
-    const charArray = quoteTextElement.querySelectorAll(".char")
-    const currentChar = inputBoxElement.value.split("");
     
-    charArray[charIndex].classList.remove("highlight");
-
-    if (["Backspace", "Delete"].includes(e.key) && charIndex > 0) {
-        reverse = true;
-        charIndex--;
-        console.log(charIndex)
-        charArray[charIndex].classList.add("highlight");
-    }
-    
-    if (charArray[charIndex].innerText == e.key) {
-        charArray[charIndex].classList.remove("incorrect");
-        charArray[charIndex].classList.add("correct");
-
-    } else if (charArray[charIndex].innerText != currentChar[charIndex]) {
-        charArray[charIndex].classList.add("incorrect"); 
-        charArray[charIndex].classList.remove("correct");
-        currentErrors++;
-    } 
-    
-    if (!reverse) {
-        charIndex++;
-        charArray[charIndex].classList.add("highlight");
-    }
-    
-    charactersTyped++;
-    reverse = false;
-    
-    const wordArray = quoteTextElement.querySelectorAll(".word")
-    const currentWordElement = quoteTextElement.childNodes[wordIndex];
-    const currentWord = wordArray[wordIndex].innerText;
-    
-    if (wordIndex === 0) {
-        currentWordElement.classList.add('highlight-word');
-        currentIndex = currentWord.length;
-    }
-    
-    if (e.keyCode === 32 && charIndex >= currentIndex) {
-        e.preventDefault();
-        charArray[charIndex].classList.remove("highlight");
-        charArray[currentIndex].classList.add("highlight");
-        
-        
-        const currentInputValue = inputBoxElement.value;
-        const nextWordElement = quoteTextElement.childNodes[wordIndex + 1];
-        inputBoxElement.value = "";
-        
-        if (currentInputValue === currentWord) {
-            currentWordElement.classList.add("correct");
-        } else {
-            currentWordElement.classList.add("incorrect");
-        }
-        
-        if (nextWordElement) {
-            currentWordElement.classList.remove("highlight-word");
-            nextWordElement.classList.add("highlight-word");
-        }
-        
-        wordIndex++;
-        charIndex = currentIndex;
-        currentIndex += nextWordElement.innerText.length;
+    if (!["Backspace", "Delete", " "].includes(e.key)) {
+        realCharactersTyped++;
     }
 
-    charactersCorrect = (charactersTyped - (errorsTotal + currentErrors));
-    currentErrorsElement.innerHTML = `${currentErrors + errorsTotal} <span class="small">Errors</span>`;
+    const { currentChar, charArray } = checkChar();
+    checkWord();
+
+    // charactersCorrect = (charactersTyped - errorsTotal);
+    currentErrorsElement.innerHTML = `${errorsTotal} <span class="small">Errors</span>`;
 
     currentAccuracy = ((charactersCorrect / charactersTyped ) * 100);
     currentAccuracyElement.innerHTML = `${Math.round(currentAccuracy)} <span class="small">%</span>`;
 
-    console.log(charIndex + "=" + (charArray.length - 1))
     if (charIndex === charArray.length - 1) {
         renderNewQuote();
         resetIndexes();
-        errorsTotal += currentErrors;
+    }
+
+    function checkWord() {
+        const wordArray = quoteTextElement.querySelectorAll(".word");
+        const currentWordElement = quoteTextElement.childNodes[wordIndex];
+        const currentWord = wordArray[wordIndex].innerText;
+
+        if (wordIndex === 0) {
+            currentWordElement.classList.add('highlight-word');
+            currentIndex = currentWord.length;
+        }
+
+        if ([" "].includes(e.key) && currentChar != "") {
+            e.preventDefault();
+            charArray[charIndex].classList.remove("highlight");
+            charArray[currentIndex].classList.add("highlight");
+
+            const currentInputValue = inputBoxElement.value;
+            const nextWordElement = quoteTextElement.childNodes[wordIndex + 1];
+            inputBoxElement.value = "";
+
+            if ((currentInputValue + " ") === currentWord) {
+                currentWordElement.classList.add("correct");
+            } else {
+                currentWordElement.classList.add("incorrect");
+                errorsTotal += currentIndex - charIndex;
+                charactersTyped += currentIndex - charIndex;
+            }
+
+            wordIndex++;
+            charIndex = currentIndex;
+
+            if (nextWordElement) {
+                currentWordElement.classList.remove("highlight-word");
+                nextWordElement.classList.add("highlight-word");
+                currentIndex += nextWordElement.innerText.length;
+            }
+        }
+    }
+
+    function checkChar() {
+        const charArray = quoteTextElement.querySelectorAll(".char");
+        const currentChar = inputBoxElement.value.split("");
+
+        charArray[charIndex].classList.remove("highlight");
+
+        if (charArray[charIndex].innerText == e.key) {
+            charArray[charIndex].classList.remove("incorrect");
+            charArray[charIndex].classList.add("correct");
+            charactersCorrect++;
+
+        } else if (charArray[charIndex].innerText != currentChar[charIndex] && e.keyCode != 8) {
+            charArray[charIndex].classList.add("incorrect");
+            charArray[charIndex].classList.remove("correct");
+            errorsTotal++;
+        }
+
+        if (["Backspace", "Delete"].includes(e.key) && charIndex > 0 && charArray[charIndex - 1].innerText != " ") {
+            charIndex--;
+            charArray[charIndex].classList.add("highlight");
+            
+        } else if (["Backspace", "Delete"].includes(e.key) && charIndex > 0 && charArray[charIndex - 1].innerText == " ") {
+            charArray[charIndex].classList.add("highlight");
+            
+        } else {
+            charArray[charIndex].classList.remove("highlight");
+            charIndex++;
+            charactersTyped++;
+            charArray[charIndex].classList.add("highlight");
+        }
+        return { currentChar, charArray };
     }
 }
 
@@ -245,14 +236,14 @@ function updateTimer() {
         minutes = minutes < 10 ? "0" + minutes : minutes;
         seconds = seconds < 10 ? "0" + seconds : seconds;
                 
-        wordsPerMinute = Math.round((((charactersTyped / 5) / timeElapsed) * 60));
+        wordsPerMinute = Math.round((((realCharactersTyped / 5) / timeElapsed) * 60));
         addDataToChart(myChart, timeElapsed, wordsPerMinute, currentAccuracy);
 
         currentTimeElement.innerText = `${minutes} : ${seconds}`;
         currentWPMElement.innerHTML = `${wordsPerMinute} <span class="small">WPM</span>`;
         
     } else {
-        let result = new Result(wordsPerMinute, errorsTotal + currentErrors, currentAccuracy, selectedTimer);
+        let result = new Result(wordsPerMinute, errorsTotal, currentAccuracy, selectedTimer);
         saveDataToLocalStorage(result);
         renderNewResult(resultsTableElement, resultsData);
         resetInstance();
@@ -330,8 +321,8 @@ function resetInstance() {
     timeElapsed = 0;
     wordsPerMinute = 0;
     errorsTotal = 0;
-    currentErrors = 0;
     charactersTyped = 0;
+    realCharactersTyped = 0;
     currentAccuracy = 0;
     degrees += 360;
     
@@ -355,7 +346,6 @@ function resetIndexes() {
     charIndex = 0;
     wordIndex = 0;
     currentIndex = 0;
-    reverse = false;
 }
 
 // ----------------------- Data handlers ----------------------- //
@@ -412,7 +402,7 @@ function renderNewResult(table) {
 
             tableWPMElement.textContent = resultsData.at(-1).wpm;
             tableErrorsElement.textContent = resultsData.at(-1).errors;
-            tableAccuracylement.textContent = resultsData.at(-1).accuracy.toFixed(2);
+            tableAccuracylement.textContent = `${resultsData.at(-1).accuracy.toFixed(2)} %`;
             tableTimeElement.textContent = formatTime(resultsData.at(-1).time);
     }
 }
@@ -426,7 +416,7 @@ function removeResults() {
 
 // ----------------------- Listeners ----------------------- //
 
-inputBoxElement.addEventListener("keydown", checkWord);
+inputBoxElement.addEventListener("keydown", handleText);
 inputBoxElement.addEventListener("keydown", addTimer, {once : true});
 restartButtonElement.addEventListener("click", resetManual);
 deleteResultsElement.addEventListener("click", removeResults);
