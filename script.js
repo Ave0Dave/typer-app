@@ -145,7 +145,7 @@ const handleText = (e) => {
     // charactersCorrect = (charactersTyped - errorsTotal);
     currentErrorsElement.innerHTML = `${errorsTotal} <span class="small">Errors</span>`;
 
-    currentAccuracy = ((charactersCorrect / charactersTyped ) * 100);
+    currentAccuracy = ((charactersCorrect / realCharactersTyped ) * 100);
     currentAccuracyElement.innerHTML = `${Math.round(currentAccuracy)} <span class="small">%</span>`;
 
     if (charIndex === charArray.length - 1) {
@@ -321,6 +321,7 @@ function resetInstance() {
     timeElapsed = 0;
     wordsPerMinute = 0;
     errorsTotal = 0;
+    charactersCorrect = 0;
     charactersTyped = 0;
     realCharactersTyped = 0;
     currentAccuracy = 0;
