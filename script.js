@@ -99,58 +99,125 @@ let degrees = 0;
 let resultsArray = resultsData;
 let running = false;
 
+let charIndex = 0;
+let wordIndex = 0;
+let reverse = false;
+let currentIndex = 0;
+
 let myChart = new Chart(document.getElementById("myChart"), config);
 
 function getRandomQuote() {
-    return fetch("https://api.quotable.io/random?minLength=80&&maxLength=130")
+    return fetch("https://random-word-api.herokuapp.com/word?number=12&swear=0")
         .then(response => response.json())
-        .then(data => data.content.toLowerCase());
+        .then(data => data);
 }
 
 async function renderNewQuote() {
     const quote = await getRandomQuote();
     quoteTextElement.innerHTML = "";
 
-    for (character of quote.split("")) {
-        const quoteCharacter = document.createElement("span");
-        quoteCharacter.className = "char";
-        quoteCharacter.innerText = character;
-        quoteTextElement.appendChild(quoteCharacter);
+    for (word of quote) {
+        word += " ";
+        const quoteWord = document.createElement("span");
+        quoteWord.className = "word";
+        
+        for (character of word) {
+            const quoteCharacter = document.createElement("span");
+            quoteCharacter.className = "char";
+            quoteCharacter.innerText = character;
+            quoteWord.appendChild(quoteCharacter);
+        }
+        quoteTextElement.appendChild(quoteWord);
     }
 
     inputBoxElement.value = "";
 }
 
-function handleText() { 
+// function getRandomQuote() {
+//     return fetch("https://api.quotable.io/random?minLength=80&&maxLength=130")
+//         .then(response => response.json())
+//         .then(data => data.content.toLowerCase());
+// }
+
+// async function renderNewQuote() {
+//     const quote = await getRandomQuote();
+//     quoteTextElement.innerHTML = "";
+
+//     for (character of quote.split("")) {
+//         const quoteCharacter = document.createElement("span");
+//         quoteCharacter.className = "char";
+//         quoteCharacter.innerText = character;
+//         quoteTextElement.appendChild(quoteCharacter);
+//     }
+
+//     inputBoxElement.value = "";
+// }
+
+const checkWord = (e) => {
     running = true;
-    const quoteArray = quoteTextElement.querySelectorAll(".char")
-    const inputArray = inputBoxElement.value.split("");
+    const charArray = quoteTextElement.querySelectorAll(".char")
+    const currentChar = inputBoxElement.value.split("");
     
-    currentErrors = 0;
+    charArray[charIndex].classList.remove("highlight");
+
+    if (["Backspace", "Delete"].includes(e.key) && charIndex > 0) {
+        reverse = true;
+        charIndex--;
+        console.log(charIndex)
+        charArray[charIndex].classList.add("highlight");
+    }
+    
+    if (charArray[charIndex].innerText == e.key) {
+        charArray[charIndex].classList.remove("incorrect");
+        charArray[charIndex].classList.add("correct");
+
+    } else if (charArray[charIndex].innerText != currentChar[charIndex]) {
+        charArray[charIndex].classList.add("incorrect"); 
+        charArray[charIndex].classList.remove("correct");
+        currentErrors++;
+    } 
+    
+    if (!reverse) {
+        charIndex++;
+        charArray[charIndex].classList.add("highlight");
+    }
+    
     charactersTyped++;
-
-    for (let [index, quoteCharacterElement] of quoteArray.entries()) {
-        const inputCharacter = inputArray[index];
-
-        if ((inputCharacter != null) && ((index + 1) < quoteArray.length)) {
-            quoteArray[index + 1].classList.add("highlight");
-            quoteCharacterElement.classList.remove("highlight");
+    reverse = false;
+    
+    const wordArray = quoteTextElement.querySelectorAll(".word")
+    const currentWordElement = quoteTextElement.childNodes[wordIndex];
+    const currentWord = wordArray[wordIndex].innerText;
+    
+    if (wordIndex === 0) {
+        currentWordElement.classList.add('highlight-word');
+        currentIndex = currentWord.length;
+    }
+    
+    if (e.keyCode === 32 && charIndex >= currentIndex) {
+        e.preventDefault();
+        charArray[charIndex].classList.remove("highlight");
+        charArray[currentIndex].classList.add("highlight");
+        
+        
+        const currentInputValue = inputBoxElement.value;
+        const nextWordElement = quoteTextElement.childNodes[wordIndex + 1];
+        inputBoxElement.value = "";
+        
+        if (currentInputValue === currentWord) {
+            currentWordElement.classList.add("correct");
+        } else {
+            currentWordElement.classList.add("incorrect");
         }
         
-        if (inputCharacter == null) {
-            quoteCharacterElement.classList.remove("correct");
-            quoteCharacterElement.classList.remove("incorrect");
-
-        } else if (inputCharacter === quoteCharacterElement.innerText) {
-            quoteCharacterElement.classList.add("correct");
-            quoteCharacterElement.classList.remove("incorrect");
-
-        } else {
-            quoteCharacterElement.classList.remove("correct");
-            quoteCharacterElement.classList.add("incorrect");
-
-            currentErrors++;
-        } 
+        if (nextWordElement) {
+            currentWordElement.classList.remove("highlight-word");
+            nextWordElement.classList.add("highlight-word");
+        }
+        
+        wordIndex++;
+        charIndex = currentIndex;
+        currentIndex += nextWordElement.innerText.length;
     }
 
     charactersCorrect = (charactersTyped - (errorsTotal + currentErrors));
@@ -159,8 +226,10 @@ function handleText() {
     currentAccuracy = ((charactersCorrect / charactersTyped ) * 100);
     currentAccuracyElement.innerHTML = `${Math.round(currentAccuracy)} <span class="small">%</span>`;
 
-    if (inputArray.length === quoteArray.length) {
+    console.log(charIndex + "=" + (charArray.length - 1))
+    if (charIndex === charArray.length - 1) {
         renderNewQuote();
+        resetIndexes();
         errorsTotal += currentErrors;
     }
 }
@@ -245,6 +314,7 @@ function attachListenerToTimers() {
 }
 
 function resetInstance() {  
+    resetIndexes();
     renderNewQuote();
     clearInterval(timer);
     
@@ -279,6 +349,13 @@ function resetManual() {
     myChart.destroy();
     removeDataFromChart(myChart);
     myChart = new Chart(document.getElementById('myChart'), config);
+}
+
+function resetIndexes() {
+    charIndex = 0;
+    wordIndex = 0;
+    currentIndex = 0;
+    reverse = false;
 }
 
 // ----------------------- Data handlers ----------------------- //
@@ -349,23 +426,10 @@ function removeResults() {
 
 // ----------------------- Listeners ----------------------- //
 
-inputBoxElement.addEventListener("input", handleText);
+inputBoxElement.addEventListener("keydown", checkWord);
 inputBoxElement.addEventListener("keydown", addTimer, {once : true});
 restartButtonElement.addEventListener("click", resetManual);
 deleteResultsElement.addEventListener("click", removeResults);
-
-inputBoxElement.addEventListener("keydown", ({key}) => {
-    const quoteArray = quoteTextElement.querySelectorAll(".char")
-    const inputArray = inputBoxElement.value.split("");
-    
-    for (let [index, quoteCharacterElement] of quoteArray.entries()) {
-        const inputCharacter = inputArray[index];
-        if ((inputCharacter!= null) && ["Backspace", "Delete"].includes(key)) {
-            quoteArray[index + 1].classList.remove("highlight");
-            quoteCharacterElement.classList.add("highlight");
-        }
-    }
-});
 
 focusModeElement.addEventListener("click", () => {
     focusModeElement.classList.toggle("selected");
