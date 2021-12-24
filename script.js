@@ -135,7 +135,7 @@ async function renderNewQuote() {
 const handleText = (e) => {
     running = true;
     
-    if (!["Backspace", "Delete", " "].includes(e.key)) {
+    if (!["Backspace", "Delete"].includes(e.key)) {
         realCharactersTyped++;
     }
 
