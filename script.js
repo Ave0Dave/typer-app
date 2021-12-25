@@ -103,16 +103,16 @@ let charIndex = 0;
 let wordIndex = 0;
 let currentIndex = 0;
 
-let myChart = new Chart(document.getElementById("myChart"), config);
+let chart = new Chart(document.getElementById("chart"), config);
 
-function getRandomQuote() {
+function getRandomWords() {
     return fetch("https://random-word-api.herokuapp.com/word?number=12&swear=0")
         .then(response => response.json())
         .then(data => data);
 }
 
-async function renderNewQuote() {
-    const quote = await getRandomQuote();
+async function renderNewWords() {
+    const quote = await getRandomWords();
     quoteTextElement.innerHTML = "";
 
     for (word of quote) {
@@ -149,7 +149,7 @@ const handleText = (e) => {
     currentAccuracyElement.innerHTML = `${Math.round(currentAccuracy)} <span class="small">%</span>`;
 
     if (charIndex === charArray.length - 1) {
-        renderNewQuote();
+        renderNewWords();
         resetIndexes();
     }
 
@@ -203,9 +203,11 @@ const handleText = (e) => {
             charactersCorrect++;
 
         } else if (charArray[charIndex].innerText != currentChar[charIndex] && e.keyCode != 8) {
+            if (!charArray[charIndex].classList.contains("incorrect")) {
+                errorsTotal++;
+            }
             charArray[charIndex].classList.add("incorrect");
             charArray[charIndex].classList.remove("correct");
-            errorsTotal++;
         }
 
         if (["Backspace", "Delete"].includes(e.key) && charIndex > 0 && charArray[charIndex - 1].innerText != " ") {
@@ -236,8 +238,7 @@ function updateTimer() {
         minutes = minutes < 10 ? "0" + minutes : minutes;
         seconds = seconds < 10 ? "0" + seconds : seconds;
                 
-        wordsPerMinute = Math.round((((realCharactersTyped / 5) / timeElapsed) * 60));
-        addDataToChart(myChart, timeElapsed, wordsPerMinute, currentAccuracy);
+        wordsPerMinute = Math.round((((charactersCorrect / 5) / timeElapsed) * 60));
 
         currentTimeElement.innerText = `${minutes} : ${seconds}`;
         currentWPMElement.innerHTML = `${wordsPerMinute} <span class="small">WPM</span>`;
@@ -246,13 +247,19 @@ function updateTimer() {
         let result = new Result(wordsPerMinute, errorsTotal, currentAccuracy, selectedTimer);
         saveDataToLocalStorage(result);
         renderNewResult(resultsTableElement, resultsData);
-        resetInstance();
+        terminateInstance();
         running = false;
     }
 }
 
 function addTimer() {
     timer = setInterval(updateTimer, 1000);
+    destroyChart();
+
+    tableWPMElement.textContent = "-";
+    tableErrorsElement.textContent = "-";
+    tableAccuracylement.textContent = "-";
+    tableTimeElement.textContent = "-";
 }
 
 function formatTime(time) {
@@ -269,7 +276,7 @@ function attachListenerToTimers() {
     for (timer of timerArray) {
         timer.addEventListener("click", (e) => {
             if (running) {
-                resetManual();
+                resetInstance();
             }
             
             switch (e.target.id) {
@@ -304,9 +311,9 @@ function attachListenerToTimers() {
     }
 }
 
-function resetInstance() {  
+function terminateInstance() {  
     resetIndexes();
-    renderNewQuote();
+    renderNewWords();
     clearInterval(timer);
     
     inputBoxElement.addEventListener("keydown", addTimer, {once : true});
@@ -332,15 +339,11 @@ function resetInstance() {
     restartIconElement.style.transform = `rotate(${degrees}deg)`;
 }
 
-function resetManual() {
-    resetInstance();
+function resetInstance() {
+    terminateInstance();
     inputBoxElement.disabled = false;
     inputBoxElement.style.cursor = "text";
     inputBoxElement.focus();
-
-    myChart.destroy();
-    removeDataFromChart(myChart);
-    myChart = new Chart(document.getElementById('myChart'), config);
 }
 
 function resetIndexes() {
@@ -363,7 +366,7 @@ function addDataToChart(chart, label, data1, data2) {
     chart.data.datasets[0].data.push(data1);
     chart.data.datasets[1].data.push(data2);
 
-    myChart.update();
+    chart.update();
 }
 
 function removeDataFromChart(chart) {
@@ -371,6 +374,12 @@ function removeDataFromChart(chart) {
         dataset.data.length = 0
     }
     chart.data.labels.length = 0;
+}
+
+function destroyChart() {
+    chart.destroy();
+    removeDataFromChart(chart);
+    chart = new Chart(document.getElementById("chart"), config);
 }
 
 // ----------------------- Data handlers ----------------------- //
@@ -419,7 +428,7 @@ function removeResults() {
 
 inputBoxElement.addEventListener("keydown", handleText);
 inputBoxElement.addEventListener("keydown", addTimer, {once : true});
-restartButtonElement.addEventListener("click", resetManual);
+restartButtonElement.addEventListener("click", resetInstance);
 deleteResultsElement.addEventListener("click", removeResults);
 
 focusModeElement.addEventListener("click", () => {
@@ -446,6 +455,6 @@ window.addEventListener("keydown", function(e) {
 
 renderTime(timeRemaining);
 attachListenerToTimers();
-renderNewQuote();
+renderNewWords();
 renderCompleteResults(resultsTableElement, resultsData);
 
