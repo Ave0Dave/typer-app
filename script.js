@@ -105,17 +105,23 @@ let currentIndex = 0;
 
 let chart = new Chart(document.getElementById("chart"), config);
 
+// function getRandomWords() {
+//     return fetch("https://random-word-api.herokuapp.com/word?number=12&swear=0")
+//         .then(response => response.json())
+//         .then(data => data);
+// }
+
 function getRandomWords() {
-    return fetch("https://random-word-api.herokuapp.com/word?number=12&swear=0")
+    return fetch("https://api.quotable.io/random?minLength=150&maxLength=200")
         .then(response => response.json())
-        .then(data => data);
+        .then(data => data.content.toLowerCase());
 }
 
 async function renderNewWords() {
     const quote = await getRandomWords();
     quoteTextElement.innerHTML = "";
 
-    for (word of quote) {
+    for (word of quote.split(" ")) {
         word += " ";
         const quoteWord = document.createElement("span");
         quoteWord.className = "word";
@@ -142,7 +148,6 @@ const handleText = (e) => {
     const { currentChar, charArray } = checkChar();
     checkWord();
 
-    // charactersCorrect = (charactersTyped - errorsTotal);
     currentErrorsElement.innerHTML = `${errorsTotal} <span class="small">Errors</span>`;
 
     currentAccuracy = ((charactersCorrect / realCharactersTyped ) * 100);
@@ -239,6 +244,8 @@ function updateTimer() {
         seconds = seconds < 10 ? "0" + seconds : seconds;
                 
         wordsPerMinute = Math.round((((charactersCorrect / 5) / timeElapsed) * 60));
+        
+        addDataToChart(chart, timeElapsed, wordsPerMinute, currentAccuracy);
 
         currentTimeElement.innerText = `${minutes} : ${seconds}`;
         currentWPMElement.innerHTML = `${wordsPerMinute} <span class="small">WPM</span>`;
