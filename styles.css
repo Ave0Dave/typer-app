@@ -23,7 +23,7 @@
   border-radius: 25px;
   border: 6px solid var(--color-black);
 }
-  
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -51,6 +51,7 @@ body {
   line-height: 1.6em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
   
   color: var(--color-white);
   background: var(--color-black);
