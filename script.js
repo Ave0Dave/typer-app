@@ -82,7 +82,7 @@ const inputModeElement = document.getElementById("input-mode");
 
 const tableWPMElement = document.getElementById("table-wpm");
 const tableErrorsElement = document.getElementById("table-errors");
-const tableAccuracylement = document.getElementById("table-accuracy");
+const tableAccuracyElement = document.getElementById("table-accuracy");
 const tableTimeElement = document.getElementById("table-time");
 
 let timer = 0;
@@ -92,8 +92,8 @@ let timeElapsed = 0;
 let wordsPerMinute = 0;
 let errorsTotal = 0;
 let currentAccuracy = 0;
-let charactersTyped = 0;
 let realCharactersTyped = 0;
+let wordsCorrect = 0;
 let charactersCorrect = 0;
 let degrees = 0;
 let resultsArray = resultsData;
@@ -160,37 +160,31 @@ const handleText = (e) => {
 
     function checkWord() {
         const wordArray = quoteTextElement.querySelectorAll(".word");
-        const currentWordElement = quoteTextElement.childNodes[wordIndex];
         const currentWord = wordArray[wordIndex].innerText;
 
         if (wordIndex === 0) {
-            currentWordElement.classList.add('highlight-word');
             currentIndex = currentWord.length;
         }
-
+        
         if ([" "].includes(e.key) && currentChar != "") {
             e.preventDefault();
             charArray[charIndex].classList.remove("highlight");
             charArray[currentIndex].classList.add("highlight");
-
+            
             const currentInputValue = inputBoxElement.value;
             const nextWordElement = quoteTextElement.childNodes[wordIndex + 1];
-            inputBoxElement.value = "";
-
+            
             if ((currentInputValue + " ") === currentWord) {
-                currentWordElement.classList.add("correct");
-            } else {
-                currentWordElement.classList.add("incorrect");
+                wordsCorrect += currentWord.length;
+            } else if (charIndex < currentIndex) {
                 errorsTotal += currentIndex - charIndex;
-                charactersTyped += currentIndex - charIndex;
             }
-
+            
+            inputBoxElement.value = "";
             wordIndex++;
             charIndex = currentIndex;
-
+            
             if (nextWordElement) {
-                currentWordElement.classList.remove("highlight-word");
-                nextWordElement.classList.add("highlight-word");
                 currentIndex += nextWordElement.innerText.length;
             }
         }
@@ -202,7 +196,7 @@ const handleText = (e) => {
 
         charArray[charIndex].classList.remove("highlight");
 
-        if (charArray[charIndex].innerText == e.key) {
+        if (charArray[charIndex].innerText === e.key) {
             charArray[charIndex].classList.remove("incorrect");
             charArray[charIndex].classList.add("correct");
             charactersCorrect++;
@@ -211,6 +205,7 @@ const handleText = (e) => {
             if (!charArray[charIndex].classList.contains("incorrect")) {
                 errorsTotal++;
             }
+
             charArray[charIndex].classList.add("incorrect");
             charArray[charIndex].classList.remove("correct");
         }
@@ -225,9 +220,8 @@ const handleText = (e) => {
         } else {
             charArray[charIndex].classList.remove("highlight");
             charIndex++;
-            charactersTyped++;
             charArray[charIndex].classList.add("highlight");
-        }
+        } 
         return { currentChar, charArray };
     }
 }
@@ -243,7 +237,7 @@ function updateTimer() {
         minutes = minutes < 10 ? "0" + minutes : minutes;
         seconds = seconds < 10 ? "0" + seconds : seconds;
                 
-        wordsPerMinute = Math.round((((charactersCorrect / 5) / timeElapsed) * 60));
+        wordsPerMinute = Math.round((((wordsCorrect / 5) / timeElapsed) * 60));
         
         addDataToChart(chart, timeElapsed, wordsPerMinute, currentAccuracy);
 
@@ -265,7 +259,7 @@ function addTimer() {
 
     tableWPMElement.textContent = "-";
     tableErrorsElement.textContent = "-";
-    tableAccuracylement.textContent = "-";
+    tableAccuracyElement.textContent = "-";
     tableTimeElement.textContent = "-";
 }
 
@@ -320,7 +314,6 @@ function attachListenerToTimers() {
 
 function terminateInstance() {  
     resetIndexes();
-    renderNewWords();
     clearInterval(timer);
     
     inputBoxElement.addEventListener("keydown", addTimer, {once : true});
@@ -335,8 +328,8 @@ function terminateInstance() {
     timeElapsed = 0;
     wordsPerMinute = 0;
     errorsTotal = 0;
+    wordsCorrect = 0;
     charactersCorrect = 0;
-    charactersTyped = 0;
     realCharactersTyped = 0;
     currentAccuracy = 0;
     degrees += 360;
@@ -347,6 +340,7 @@ function terminateInstance() {
 }
 
 function resetInstance() {
+    renderNewWords();
     terminateInstance();
     inputBoxElement.disabled = false;
     inputBoxElement.style.cursor = "text";
@@ -419,7 +413,7 @@ function renderNewResult(table) {
 
             tableWPMElement.textContent = resultsData.at(-1).wpm;
             tableErrorsElement.textContent = resultsData.at(-1).errors;
-            tableAccuracylement.textContent = `${resultsData.at(-1).accuracy.toFixed(2)} %`;
+            tableAccuracyElement.textContent = `${resultsData.at(-1).accuracy.toFixed(2)} %`;
             tableTimeElement.textContent = formatTime(resultsData.at(-1).time);
     }
 }
@@ -444,6 +438,7 @@ focusModeElement.addEventListener("click", () => {
     overlayElement.classList.toggle("overlay-visible");
     document.body.classList.toggle("scroll-disabled");
     window.scrollTo(0, 0); 
+    inputBoxElement.focus();
 });
 
 inputModeElement.addEventListener("click", () => {

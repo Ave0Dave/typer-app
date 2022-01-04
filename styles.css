@@ -193,11 +193,8 @@ img {
   justify-content: space-between;
   align-items: flex-start;
   width: 58ch;
+  padding: 1em 0;
   border-top: thin solid var(--color-grey-light);
-}
-
-.last-result-wrapper {
-  margin-top: 1.5rem;
 }
 
 #overlay {
@@ -230,7 +227,6 @@ img {
 
 .table {
   min-width: 40ch;
-  margin: 2rem 0 0 0;
   font-size: 1.1rem;
   border-collapse: collapse;
   text-align: left;
@@ -244,6 +240,7 @@ img {
 .last-result {
   width: 100%;
   min-width: 30ch;
+  margin-top: 1em;
   font-size: 1.2rem;
 }
 
