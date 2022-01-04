@@ -160,6 +160,7 @@ const handleText = (e) => {
 
     function checkWord() {
         const wordArray = quoteTextElement.querySelectorAll(".word");
+        const currentWordElement = quoteTextElement.childNodes[wordIndex];
         const currentWord = wordArray[wordIndex].innerText;
 
         if (wordIndex === 0) {
@@ -177,6 +178,7 @@ const handleText = (e) => {
             if ((currentInputValue + " ") === currentWord) {
                 wordsCorrect += currentWord.length;
             } else if (charIndex < currentIndex) {
+                currentWordElement.classList.add("incorrect");
                 errorsTotal += currentIndex - charIndex;
             }
             
