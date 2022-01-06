@@ -207,23 +207,18 @@ const handleText = (e) => {
             if (!charArray[charIndex].classList.contains("incorrect")) {
                 errorsTotal++;
             }
-
             charArray[charIndex].classList.add("incorrect");
             charArray[charIndex].classList.remove("correct");
         }
 
         if (["Backspace", "Delete"].includes(e.key) && charIndex > 0 && charArray[charIndex - 1].innerText != " ") {
             charIndex--;
-            charArray[charIndex].classList.add("highlight");
-            
-        } else if (["Backspace", "Delete"].includes(e.key) && charIndex > 0 && charArray[charIndex - 1].innerText == " ") {
-            charArray[charIndex].classList.add("highlight");
-            
-        } else {
-            charArray[charIndex].classList.remove("highlight");
+        } else if (!["Backspace", "Delete"].includes(e.key)) {
             charIndex++;
-            charArray[charIndex].classList.add("highlight");
-        } 
+        }
+
+        charArray[charIndex].classList.add("highlight"); 
+        
         return { currentChar, charArray };
     }
 }
