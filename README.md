@@ -1,2 +1,2 @@
-# typer-app
-![Typer page preview](https://imgur.com/a/lMyTPB4)
+# Typer
+![Typer page preview](https://i.imgur.com/H0QtiOk.gif)
